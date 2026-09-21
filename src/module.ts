@@ -104,6 +104,7 @@ export interface HomeAssistantPlatformConfig extends PlatformConfig {
   postfix: string;
   airQualityRegex: string;
   enableServerRvc: boolean;
+  rvcCleanModeSelects: Record<string, string>;
   discardHiddenEntities: boolean;
   virtualControlLabel: string;
 }
@@ -1180,6 +1181,38 @@ export class HomeAssistantPlatform extends MatterbridgeDynamicPlatform {
           await this.ha.callService('light', 'turn_on', entityId, serviceAttributes);
           // Remove the entity from the set of entities that have received an update while being off, since we are applying now the updates when turning on the light.
           this.offUpdatedEntities.delete(entityId);
+          return;
+        }
+      }
+      // RVC clean mode: map Matter RvcCleanMode.changeToMode to the configured Home Assistant selector.
+      if (domain === 'vacuum' && command === 'changeToMode') {
+        const cleanModeSelect = this.config.rvcCleanModeSelects?.[entityId];
+      
+        if (cleanModeSelect) {
+          const selectState = this.ha.hassStates.get(cleanModeSelect);
+          const options = selectState?.attributes?.['options'];
+          const newMode = data.request?.['newMode'];
+      
+          if (isValidArray(options, 1) && isValidNumber(newMode, 1) && newMode <= options.length) {
+            const option = options[newMode - 1];
+      
+            if (isValidString(option, 1)) {
+              data.endpoint.log.info(
+                `RVC clean mode ${CYAN}${newMode}${db} => ${CYAN}${option}${db} using ${CYAN}${cleanModeSelect}${db}`,
+              );
+      
+              await this.ha.callService('input_select', 'select_option', cleanModeSelect, {
+                option,
+              });
+      
+              return;
+            }
+          }
+      
+          data.endpoint.log.warn(
+            `Invalid RVC clean mode ${CYAN}${newMode}${db} for selector ${CYAN}${cleanModeSelect}${db}`,
+          );
+      
           return;
         }
       }

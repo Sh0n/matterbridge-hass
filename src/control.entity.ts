@@ -236,12 +236,33 @@ export function addControlEntity(
 
   // Configure the vacuum.
   if (domain === 'vacuum') {
-    platform.log.debug(`= vacuum device ${CYAN}${entity.entity_id}${db} activity: ${CYAN}${state.attributes['activity']}${db}`);
-    platform.log.debug(
-      `# vacuum device ${CYAN}${entity.entity_id}${db} supported_features: ${CYAN}${getFeatureNames(VacuumEntityFeature, state.attributes.supported_features)}${db}`,
-    );
-    mutableDevice.addVacuum(endpointName);
+  platform.log.debug(`= vacuum device ${CYAN}${entity.entity_id}${db} activity: ${CYAN}${state.attributes['activity']}${db}`);
+  platform.log.debug(
+    `# vacuum device ${CYAN}${entity.entity_id}${db} supported_features: ${CYAN}${getFeatureNames(VacuumEntityFeature, state.attributes.supported_features)}${db}`,
+  );
+
+  let cleanModes: string[] = ['Vacuum'];
+
+  const cleanModeSelect = platform.config.rvcCleanModeSelects?.[entity.entity_id];
+
+  if (cleanModeSelect) {
+    const selectState = platform.ha.hassStates.get(cleanModeSelect);
+    const options = selectState?.attributes?.['options'];
+
+    if (isValidArray(options, 1)) {
+      cleanModes = options.filter((option): option is string => isValidString(option, 1));
+      platform.log.info(
+        `RVC clean modes for ${CYAN}${entity.entity_id}${db} loaded from ${CYAN}${cleanModeSelect}${db}: ${CYAN}${cleanModes.join(', ')}${db}`,
+      );
+    } else {
+      platform.log.warn(
+        `RVC clean mode select ${CYAN}${cleanModeSelect}${db} has no valid options. Using default Vacuum mode.`,
+      );
+    }
   }
+
+  mutableDevice.addVacuum(endpointName, cleanModes);
+}
 
   // Configure the valve.
   if (domain === 'valve') {

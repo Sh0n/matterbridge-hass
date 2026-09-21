@@ -819,7 +819,11 @@ export class MutableDevice {
     );
     device.clusterServersObjs.push(
       getClusterServerObj(RvcCleanMode.id, MatterbridgeRvcCleanModeServer, {
-        supportedModes: [{ label: 'Vacuum', mode: 1, modeTags: [{ value: RvcCleanMode.ModeTag.Vacuum }] }],
+        supportedModes: cleanModes.map((label, index) => ({
+          label,
+          mode: index + 1,
+          modeTags: [{ value: RvcCleanMode.ModeTag.Vacuum }],
+        })),
         currentMode: 1,
       }),
     );

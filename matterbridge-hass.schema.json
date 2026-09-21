@@ -217,6 +217,15 @@
       "type": "boolean",
       "default": true
     },
+    "rvcCleanModeSelects": {
+      "title": "Rvc Clean Mode Selects",
+      "description": "Map a vacuum entity_id to a Home Assistant input_select/select entity used as the RVC clean mode selector.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {}
+    },
     "discardHiddenEntities": {
       "title": "Discard Hidden Entities",
       "description": "Discard entities with 'hidden' attribute set to true. This will prevent the plugin from exposing entities that are hidden in Home Assistant.",

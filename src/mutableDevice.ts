@@ -817,16 +817,19 @@ export class MutableDevice {
         currentMode: 1,
       }),
     );
-    device.clusterServersObjs.push(
-      getClusterServerObj(RvcCleanMode.id, MatterbridgeRvcCleanModeServer, {
-        supportedModes: cleanModes.map((label, index) => ({
-          label,
-          mode: index + 1,
-          modeTags: [{ value: RvcCleanMode.ModeTag.Vacuum }],
-        })),
-        currentMode: 1,
-      }),
-    );
+
+    const modeTags = [
+      RvcCleanMode.ModeTag.Vacuum,
+      RvcCleanMode.ModeTag.Max,
+      RvcCleanMode.ModeTag.DeepClean,
+    ];
+
+    supportedModes: cleanModes.map((label, index) => ({
+      label,
+      mode: index + 1,
+      modeTags: [{ value: modeTags[index] ?? RvcCleanMode.ModeTag.Vacuum }],
+    })),
+
     device.clusterServersObjs.push(
       getClusterServerObj(RvcOperationalState.id, MatterbridgeRvcOperationalStateServer, {
         operationalStateList: [

@@ -806,7 +806,7 @@ export class MutableDevice {
     return this;
   }
 
-  addVacuum(endpoint: string): this {
+  addVacuum(endpoint: string, cleanModes: string[] = ['Vacuum']): this {
     const device = this.initializeEndpoint(endpoint);
     device.clusterServersObjs.push(
       getClusterServerObj(RvcRunMode.id, MatterbridgeRvcRunModeServer, {
